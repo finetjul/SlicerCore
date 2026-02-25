@@ -35,7 +35,7 @@ def main():
         print(f"Given version, {version}, is not a valid version identifier")
         exit(1)
 
-    for package, file in FILES:
+    for package, file in FILES.items():
         patch_version(file, package, version)
 
 
