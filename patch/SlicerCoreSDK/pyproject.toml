@@ -2,13 +2,15 @@
 requires = [
   "scikit-build-core",
   "vtk-sdk==9.6.0",
-  "vtk-sdk-python-wheel-helper"
+  "vtk-sdk-python-wheel-helper",
+  "ninja"
 ]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 build-dir = "../wheelbuild"
 cmake.source-dir = ".."
+cmake.args = ["-GNinja", "-DCMAKE_BUILD_TYPE=Release"]
 
 [tool.scikit-build.cmake.define]
 BUILD_SDK = "ON"
