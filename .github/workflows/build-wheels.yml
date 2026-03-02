@@ -107,6 +107,9 @@ jobs:
     # Build and test wheels
     - uses: actions/checkout@v4
 
+    # Use MSVC with Ninja on Windows
+    - uses: ilammy/msvc-dev-cmd@v1.13.0
+
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v5
       with:
