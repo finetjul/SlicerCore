@@ -95,16 +95,6 @@ if((NOT DEFINED TBB_DIR
   set(TBB_BIN_DIR ${EP_INSTALL_DIR}/${tbb_bindir})
   set(TBB_LIB_DIR ${EP_INSTALL_DIR}/${tbb_libdir})
 
-  if(APPLE)
-    set(_tbb_suffix "$<$<CONFIG:Debug>:_debug>")
-    ExternalProject_Add_Step(${proj} fix_rpath
-      COMMAND install_name_tool -id ${TBB_LIB_DIR}/libtbb${_tbb_suffix}.12.dylib ${TBB_LIB_DIR}/libtbb${_tbb_suffix}.12.dylib
-      COMMAND install_name_tool -id ${TBB_LIB_DIR}/libtbbmalloc${_tbb_suffix}.2.dylib ${TBB_LIB_DIR}/libtbbmalloc${_tbb_suffix}.2.dylib
-      COMMAND install_name_tool -id ${TBB_LIB_DIR}/libtbbmalloc_proxy${_tbb_suffix}.2.dylib -change @rpath/libtbbmalloc${_tbb_suffix}.2.dylib ${TBB_LIB_DIR}/libtbbmalloc${_tbb_suffix}.2.dylib ${TBB_LIB_DIR}/libtbbmalloc_proxy${_tbb_suffix}.2.dylib
-      DEPENDEES install
-      )
-  endif()
-
   #-----------------------------------------------------------------------------
   # Launcher setting specific to build tree
 
