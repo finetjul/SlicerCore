@@ -5,7 +5,6 @@ project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
 option(BUILD_SHARED_LIBS "Build shared libraries." ON)
 option(BUILD_SDK "If ON, build SlicerCore-SDK instead of SlicerCore runtime" OFF)
 option(USE_SUPERBUILD "Build dependencies using Slicer superbuild" ON)
-option(USE_SYSTEM_LINKER "Slicer core uses mold or lld on Linux when available, if ON this will fallback to system linker" OFF)
 
 list(APPEND CMAKE_MODULE_PATH
   "${CMAKE_CURRENT_SOURCE_DIR}/SlicerCore/CMake"
@@ -79,7 +78,6 @@ endif()
 
 include(VTKSDKPythonWheelHelper)
 
-# Install runtime only dependencies
 vtksdk_build_modules(${SKBUILD_PROJECT_NAME}
   MODULES ${modules}
   LAYOUT ${layout}
@@ -102,7 +100,19 @@ if(BUILD_SDK)
   )
 else()
   vtksdk_generate_package_init(${SKBUILD_PROJECT_NAME} MODULES ${modules})
-  vtksdk_install_runtimes_deps(${SKBUILD_PROJECT_NAME} MODULES ${modules})
+  vtksdk_install_runtimes_deps(${SKBUILD_PROJECT_NAME}
+    MODULES ${modules}
+    PATHS # Add search paths for Windows, the $<CONFIG> versions are there for MSBuild support
+      "${SDK_DEPS_DIR}/bin"
+      "${SlicerExecutionModel_DIR}/ModuleDescriptionParser/bin"
+      "${SlicerExecutionModel_DIR}/ModuleDescriptionParser/bin/$<CONFIG>"
+      "${Teem_DIR}/bin"
+      "${Teem_DIR}/bin/$<CONFIG>"
+      "${LibArchive_DIR}/bin"
+      "${LibArchive_DIR}/bin/$<CONFIG>"
+      "${JsonCpp_DIR}/bin"
+      "${JsonCpp_DIR}/bin/$<CONFIG>"
+  )
 
   # These scripts enable users to use slicer in python as-if they were using SlicerPython
   # Example: `import slicer; slicer.vtkMRMLNode()`

@@ -61,16 +61,43 @@ mark_as_superbuild(
     SKBUILD_PROJECT_VERSION
     SKBUILD_PROJECT_VERSION_FULL
   ALL_PROJECTS
+)
+
+# Some dependencies use really old CMake policies,
+# anything below 3.5 is no longer supported with CMake 4.
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
+  set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+  mark_as_superbuild(VARS CMAKE_POLICY_VERSION_MINIMUM ALL_PROJECTS)
+endif()
+
+if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+  # Enforce default runtime library with MSVC to MDd for Debug, MD otherwise.
+  # CMake tries to use static version by default.
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+  # Some dependencies use old CMake policies (<3.15),
+  # making CMAKE_MSVC_RUNTIME_LIBRARY unused by CMake to set the right runtime with MSVC
+  # so we will force the CMAKE_C[XX]_FLAGS to have the /MD or /MDd flag
+  foreach(lang IN ITEMS C CXX)
+    set("CMAKE_${lang}_FLAGS_DEBUG_INIT" "${CMAKE_${lang}_FLAGS_DEBUG} /MDd")
+    set("CMAKE_${lang}_FLAGS_RELEASE_INIT" "${CMAKE_${lang}_FLAGS_RELEASE} /MD")
+    set("CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT" "${CMAKE_${lang}_FLAGS_RELWITHDEBINFO} /MD")
+    set("CMAKE_${lang}_FLAGS_MINSIZEREL_INIT" "${CMAKE_${lang}_FLAGS_MINSIZEREL} /MD")
+  endforeach()
+
+  mark_as_superbuild(
+    VARS
+      CMAKE_CXX_FLAGS_DEBUG_INIT
+      CMAKE_CXX_FLAGS_RELEASE_INIT
+      CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT
+      CMAKE_CXX_FLAGS_MINSIZEREL_INIT
+      CMAKE_MSVC_RUNTIME_LIBRARY
+    ALL_PROJECTS
   )
+endif()
 
 # Forward used linker if any
 if(DEFINED CMAKE_LINKER_TYPE)
   mark_as_superbuild(VARS CMAKE_LINKER_TYPE ALL_PROJECTS)
-endif()
-
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
-  set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-  mark_as_superbuild(VARS CMAKE_POLICY_VERSION_MINIMUM ALL_PROJECTS)
 endif()
 
 if(APPLE)
@@ -79,14 +106,13 @@ if(APPLE)
     CMAKE_OSX_SYSROOT:PATH
     CMAKE_OSX_DEPLOYMENT_TARGET:STRING
     ALL_PROJECTS
-    )
+  )
 endif()
 
-# TODO: doc
 if(DEFINED EXTERNAL_PROJECT_CMAKE_CACHE_ARGS)
   foreach(varname IN LISTS EXTERNAL_PROJECT_CMAKE_CACHE_ARGS)
     if(DEFINED ${varname})
-      mark_as_superbuild(${varname})
+      mark_as_superbuild(VARS ${varname} ALL_PROJECTS)
     endif()
   endforeach()
 endif()
@@ -133,7 +159,7 @@ ExternalProject_Add(${proj}
     -DSDK_DEPS_DIR:STRING=${EP_DEPENDENCIES_INSTALL_DIR}
     ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
   INSTALL_COMMAND ""
-  )
+)
 ExternalProject_AlwaysConfigure(${proj})
 
 # Forward install code from inner build to this project
