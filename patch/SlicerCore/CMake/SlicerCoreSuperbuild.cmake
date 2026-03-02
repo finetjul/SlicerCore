@@ -21,7 +21,6 @@ include(ExternalProjectGenerateProjectDescription)
 set(EP_GIT_PROTOCOL "https") # some clones fail with git:
 set(Slicer_BUILD_DICOM_SUPPORT "ON") # always build DICOM support
 set(Slicer_USE_TBB "ON") # always use tbb
-set(Slicer_USE_SYSTEM_VTK ON) # vtk comes from vtk-sdk
 
 # Global build options
 set(CMAKE_CXX_STANDARD "17")
@@ -34,7 +33,7 @@ set(EP_DEPENDENCIES_INSTALL_DIR "${CMAKE_BINARY_DIR}/deps-install")
 list(APPEND CMAKE_PREFIX_PATH "${EP_DEPENDENCIES_INSTALL_DIR}")
 
 # Set install RPATH of some dependencies
-# All dependencies will be installed in the same directory, so $ORIGIN (or equivalent) is enough
+# All dependencies will be installed in the same directory, so $ORIGIN or @loader_path is good enough
 set(CMAKE_INSTALL_RPATH)
 if(APPLE)
   set(CMAKE_INSTALL_RPATH "@loader_path")
@@ -42,6 +41,7 @@ elseif(NOT WIN32)
   set(CMAKE_INSTALL_RPATH "$ORIGIN")
 endif()
 
+# Base variables for all platforms and CMake version
 mark_as_superbuild(
   VARS
     # Global build options
@@ -50,10 +50,6 @@ mark_as_superbuild(
     CMAKE_CXX_STANDARD
     CMAKE_CXX_STANDARD_REQUIRED
     CMAKE_CXX_EXTENSIONS
-    CMAKE_CXX_FLAGS_DEBUG
-    CMAKE_CXX_FLAGS_RELEASE
-    CMAKE_CXX_FLAGS_RELWITHDEBINFO
-    CMAKE_CXX_FLAGS_MINSIZEREL
     CMAKE_POSITION_INDEPENDENT_CODE
     # forward VTK and helper prefixes
     CMAKE_PREFIX_PATH
