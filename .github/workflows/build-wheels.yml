@@ -135,7 +135,7 @@ jobs:
       env:
         CIBW_TEST_COMMAND: "python -m pytest Slicer/SlicerCore --local-wheels=wheelhouse -m runtime --verbose"
       with:
-        package-dir: Slicer
+        package-dir: Slicer/SlicerCore
         output-dir: wheelhouse
 
     - name: Dry-run create wheels
