@@ -147,15 +147,15 @@ jobs:
       if: ${{ inputs.dry-run && runner.os != 'Windows' }}
       run: |
         mkdir wheelhouse
-        zip wheelhouse/slicer_core-0.0.1-${{ inputs.wheel-tag }}.whl README.md
-        zip wheelhouse/slicer_core_sdk-0.0.1-${{ inputs.wheel-tag }}.whl README.md
+        zip wheelhouse/slicer_core-0.0.1-${{ inputs.python-version }}-${{ inputs.wheel-tag }}.whl README.md
+        zip wheelhouse/slicer_core_sdk-0.0.1-${{ inputs.python-version }}-${{ inputs.wheel-tag }}.whl README.md
 
     - name: Dry-run create wheels
       if: ${{ inputs.dry-run && runner.os == 'Windows' }}
       run: |
         mkdir wheelhouse
-        Compress-Archive -Path README.md -DestinationPath wheelhouse/slicer_core-0.0.1-${{ inputs.wheel-tag }}.whl
-        Compress-Archive -Path README.md -DestinationPath wheelhouse/slicer_core_sdk-0.0.1-${{ inputs.wheel-tag }}.whl
+        Compress-Archive -Path README.md -DestinationPath wheelhouse/slicer_core-0.0.1-${{ inputs.python-version }}-${{ inputs.wheel-tag }}.whl
+        Compress-Archive -Path README.md -DestinationPath wheelhouse/slicer_core_sdk-0.0.1-${{ inputs.python-version }}-${{ inputs.wheel-tag }}.whl
 
     - name: ccache stats (after Runtime build)
       if: ${{ inputs.use-cache && !inputs.dry-run }}
