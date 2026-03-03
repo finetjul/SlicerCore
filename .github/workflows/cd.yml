@@ -26,6 +26,7 @@ jobs:
       build-targets: ${{ matrix.build-targets }}
       platform-tag: ${{ matrix.platform-tag }}
       macosx-deployment-target: "11.0"
+      use-cache: true
 
   upload-github:
     name: Push SlicerCore release on github

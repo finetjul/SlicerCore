@@ -22,14 +22,14 @@ on:
         type: string
       macosx-deployment-target:
         description: 'Used to set the MACOSX_DEPLOYMENT_TARGET env variable. Only used on Mac.'
-        required: false
+        required: true
         default: "11.0"
         type: string
       use-cache:
         description: 'Enable or disable ccache restoration and saving'
         type: boolean
         default: true
-        required: false
+        required: true
       dry-run:
         description: 'Creates a dummy wheel instead of building slicer core'
         type: boolean
@@ -114,13 +114,20 @@ jobs:
     # Build and test wheels
     - uses: actions/checkout@v4
 
-    # Use MSVC with Ninja on Windows
-    - uses: ilammy/msvc-dev-cmd@v1.13.0
+    # This python is used to patch the project, not to build!
+    - name: Set up Python
       if: ${{ !inputs.dry-run }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
 
     - name: Apply patch
       if: ${{ !inputs.dry-run }}
       run: python apply_patch.py && python set_vtk_version.py ${{ inputs.vtk-tag }}
+
+    # Use MSVC with Ninja on Windows
+    - uses: ilammy/msvc-dev-cmd@v1.13.0
+      if: ${{ !inputs.dry-run }}
 
     - name: Build wheel
       if: ${{ !inputs.dry-run }}
@@ -128,7 +135,7 @@ jobs:
       env:
         CIBW_TEST_COMMAND: "python -m pytest Slicer/SlicerCore --local-wheels=wheelhouse -m runtime --verbose"
       with:
-        package-dir: Slicer
+        package-dir: Slicer/SlicerCore
         output-dir: wheelhouse
 
     - name: Dry-run create wheels
