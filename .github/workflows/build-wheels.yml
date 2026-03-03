@@ -79,14 +79,14 @@ jobs:
     steps:
     # Install and setup ccache on host
     - name: ccache config (Windows)
-      if: runner.os == 'Windows' && inputs.use-cache && !inputs.dry-run
+      if: ${{ runner.os == 'Windows' && inputs.use-cache && !inputs.dry-run }}
       run: |
         ccache --set-config=max_size=768Mi && ccache --set-config=compression=true
         "CMAKE_C_COMPILER_LAUNCHER=ccache" | Out-File -FilePath $env:GITHUB_ENV -Append
         "CMAKE_CXX_COMPILER_LAUNCHER=ccache" | Out-File -FilePath $env:GITHUB_ENV -Append
 
     - name: ccache config (Mac)
-      if: runner.os == 'macOS' && inputs.use-cache && !inputs.dry-run
+      if: ${{ runner.os == 'macOS' && inputs.use-cache && !inputs.dry-run }}
       run: |
         brew install ccache
         ccache --set-config=max_size=768Mi && ccache --set-config=compression=true
@@ -94,7 +94,7 @@ jobs:
         echo "CMAKE_CXX_COMPILER_LAUNCHER=ccache" >> $GITHUB_ENV
 
     - name: ccache config (Linux)
-      if: runner.os == 'Linux' && inputs.use-cache && !inputs.dry-run
+      if: ${{ runner.os == 'Linux' && inputs.use-cache && !inputs.dry-run }}
       run: |
         sudo apt-get update && sudo apt-get install -y ccache
         ccache --set-config=max_size=512Mi && ccache --set-config=compression=true
@@ -104,7 +104,7 @@ jobs:
         CMAKE_CXX_COMPILER_LAUNCHER=ccache" >> $GITHUB_ENV
 
     - name: Restore ccache
-      if: inputs.use-cache && !inputs.dry-run
+      if: ${{ inputs.use-cache && !inputs.dry-run }}
       uses: actions/cache/restore@v4
       with:
         path: |
@@ -117,14 +117,13 @@ jobs:
 
     # Build and test wheels
     - uses: actions/checkout@v4
-      if: !inputs.dry-run
 
     # Use MSVC with Ninja on Windows
     - uses: ilammy/msvc-dev-cmd@v1.13.0
-      if: !inputs.dry-run
+      if: ${{ !inputs.dry-run }}
 
     - name: Set up Python ${{ inputs.python-version }}
-      if: !inputs.dry-run
+      if: ${{ !inputs.dry-run }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
@@ -132,11 +131,11 @@ jobs:
         cache-dependency-path: 'pyproject.toml'
 
     - name: Apply patch
-      if: !inputs.dry-run
+      if: ${{ !inputs.dry-run }}
       run: python apply_patch.py && python set_vtk_version.py ${{ inputs.vtk-tag }}
 
     - name: Build wheel
-      if: !inputs.dry-run
+      if: ${{ !inputs.dry-run }}
       uses: pypa/cibuildwheel@v3.3.1
       env:
         CIBW_TEST_COMMAND: "python -m pytest Slicer/SlicerCore --local-wheels=wheelhouse -m runtime --verbose"
@@ -145,14 +144,21 @@ jobs:
         output-dir: wheelhouse
 
     - name: Dry-run create wheels
-      if: inputs.dry-run
+      if: ${{ inputs.dry-run && runner.os != 'Windows' }}
       run: |
         mkdir wheelhouse
         zip wheelhouse/slicer_core-0.0.1-${{ inputs.wheel-tag }}.whl README.md
         zip wheelhouse/slicer_core_sdk-0.0.1-${{ inputs.wheel-tag }}.whl README.md
 
+    - name: Dry-run create wheels
+      if: ${{ inputs.dry-run && runner.os == 'Windows' }}
+      run: |
+        mkdir wheelhouse
+        Compress-Archive -Path README.md -DestinationPath wheelhouse/slicer_core-0.0.1-${{ inputs.wheel-tag }}.whl
+        Compress-Archive -Path README.md -DestinationPath wheelhouse/slicer_core_sdk-0.0.1-${{ inputs.wheel-tag }}.whl
+
     - name: ccache stats (after Runtime build)
-      if: inputs.use-cache && !inputs.dry-run
+      if: ${{ inputs.use-cache && !inputs.dry-run }}
       run: ccache -s -v
 
     - name: Upload wheel artifact
@@ -162,7 +168,7 @@ jobs:
         path: wheelhouse/slicer_core-*.whl
 
     - name: Build wheel SDK
-      if: !inputs.dry-run
+      if: ${{ !inputs.dry-run }}
       uses: pypa/cibuildwheel@v3.3.1
       env:
         CIBW_TEST_COMMAND: "python -m pytest Slicer/SlicerCoreSDK --local-wheels=wheelhouse -m sdk --verbose"
@@ -171,7 +177,7 @@ jobs:
         output-dir: wheelhouse
 
     - name: ccache stats (after SDK build)
-      if: inputs.use-cache && !inputs.dry-run
+      if: ${{ inputs.use-cache && !inputs.dry-run }}
       run: ccache -s -v
 
     - name: Upload wheel SDK artifact
@@ -183,7 +189,7 @@ jobs:
     - name: Save ccache
       uses: actions/cache/save@v4
       # We want the cache to be updated regardless of success, but ONLY if caching is enabled
-      if: always() && inputs.use-cache && !inputs.dry-run
+      if: ${{ always() && inputs.use-cache && !inputs.dry-run }}
       with:
         path: |
           ~/.cache/ccache
