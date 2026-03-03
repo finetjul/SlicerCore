@@ -39,6 +39,7 @@ jobs:
       build-target: ${{ matrix.cp-tag }}-${{ matrix.platform-tag }}
       wheel-tag: ${{ matrix.wheel-tag }}
       use-cache: true
+      dry-run: true
 
   upload-github:
     name: Push SlicerCore release on github
@@ -57,12 +58,16 @@ jobs:
           path: ./wheelhouse
           merge-multiple: true # Flattens them into one directory
 
-      - name: Publish Release and Attach Wheels
-        uses: softprops/action-gh-release@v2
-        with:
-          generate_release_notes: true 
-          # Attach all the downloaded wheels to the GitHub Release page
-          files: ./wheelhouse/*.whl
+      - name: Show downloaded wheels
+        run: ls ./wheelhouse
+
+      #- name: Publish Release and Attach Wheels
+      #  uses: softprops/action-gh-release@v2
+      #  with:
+      #    generate_release_notes: true 
+      #    # Attach all the downloaded wheels to the GitHub Release page
+      #    files: ./wheelhouse/*.whl
+    
 
   upload-pypi:
     name: Push SlicerCore on PyPi
@@ -86,8 +91,11 @@ jobs:
           pattern: slicer_core-*
           merge-multiple: true # Flattens them into one directory
 
+      - name: Show downloaded wheels
+        run: ls ./wheelhouse
+
       # https://docs.pypi.org/trusted-publishers/using-a-publisher/
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-            packages-dir: ./wheelhouse
+      #- name: Publish package distributions to PyPI
+      #  uses: pypa/gh-action-pypi-publish@release/v1
+      #  with:
+      #      packages-dir: ./wheelhouse
