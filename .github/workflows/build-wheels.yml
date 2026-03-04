@@ -78,7 +78,6 @@ jobs:
       if: ${{ runner.os == 'Windows' && inputs.use-cache && !inputs.dry-run }}
       run: |
         winget install sccache --disable-interactivity --accept-source-agreements
-        "SCCACHE_DIR=C:\Users\runneradmin\AppData\Local\sccache" | Out-File -FilePath $env:GITHUB_ENV -Append
         "SCCACHE_CACHE_SIZE=768M" | Out-File -FilePath $env:GITHUB_ENV -Append
         "CMAKE_C_COMPILER_LAUNCHER=sccache" | Out-File -FilePath $env:GITHUB_ENV -Append
         "CMAKE_CXX_COMPILER_LAUNCHER=sccache" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -108,7 +107,7 @@ jobs:
         path: |
           ~/.cache/ccache
           ~/Library/Caches/ccache
-          C:\Users\runneradmin\AppData\Local\sccache
+          C:\Users\runneradmin\AppData\Local\Mozilla\sccache\cache
         key: ccache-${{ inputs.os }}-${{ github.run_id }}
         restore-keys: |
           ccache-${{ inputs.os }}-
@@ -191,5 +190,5 @@ jobs:
         path: |
           ~/.cache/ccache
           ~/Library/Caches/ccache
-          C:\Users\runneradmin\AppData\Local\sccache
+          C:\Users\runneradmin\AppData\Local\Mozilla\sccache\cache
         key: ccache-${{ inputs.os }}-${{ github.run_id }}
