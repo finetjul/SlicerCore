@@ -46,7 +46,7 @@ jobs:
       # cibuildwheel creates a docker container for building our wheel
       # This is all the required steps to use host ccache correctly
       # Note that this is only needed on linux, as Mac and Windows do not use docker containers
-      CIBW_CONTAINER_ENGINE: "docker; create_args: --volume /home/runner/.cache/ccache:/host/.cache/ccache --volume /home/runner/.config/ccache:/host/.config/ccache"
+      CIBW_CONTAINER_ENGINE: "docker; create_args: --volume /home/runner/.cache/ccache:/host/.cache/ccache --volume /home/runner/.config/ccache:/host/.config/ccache --volume /home/runner/test_wheelhouse:/tmp/test_wheelhouse"
       # Install a compiler cache on each platform
       CIBW_BEFORE_ALL_LINUX: "yum install -y ccache mesa-libGL-devel glx-utils freeglut-devel && ccache --show-config && ccache -z"
       CIBW_BEFORE_ALL_MACOS: "ccache --show-config && ccache -z"
