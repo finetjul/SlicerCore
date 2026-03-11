@@ -1,0 +1,40 @@
+name: Update PyPA Index
+
+on:
+  repository_dispatch:
+    types: [update-project-index]
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to commit the updated HTML files back to the repo
+
+    steps:
+      - name: Checkout Index Repository
+        uses: actions/checkout@v4
+        with:
+          ref: "pypa-index"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Update HTML Files
+        env:
+          REPOSITORY_ORG: ${{ github.event.client_payload.repository_org }}
+          REPOSITORY_NAME: ${{ github.event.client_payload.repository_name }}
+          RELEASE_TAG: ${{ github.event.client_payload.release_tag }}
+          PROJECT_NAME: ${{ github.event.client_payload.project_name }}
+        run: |
+          python -m pip install -r requirements.txt
+          python update_index.py --organization $REPOSITORY_ORG --repository $REPOSITORY_NAME --tag $RELEASE_TAG --name $PROJECT_NAME
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "Kitware Europe"
+          git config --global user.email "kitware@kitware.eu"
+          git add index.html ${{ github.event.client_payload.project_name }}/index.html
+          git commit -m "index: Update index of ${{ github.event.client_payload.project_org }}/${{ github.event.client_payload.project_name }}"
+          git push
