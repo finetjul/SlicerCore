@@ -78,9 +78,6 @@ jobs:
     - name: Build runtime wheel
       run: python -m pip wheel ./Slicer/SlicerCore --wheel-dir ./wheelhouse --no-build-isolation
 
-    - name: Test runtime wheel
-      run: python -m pytest ./Slicer/SlicerCore --local-wheels=./wheelhouse -m runtime --verbose
-
     - name: sccache stats (after Runtime build)
       if: ${{ inputs.use-cache }}
       run: |
@@ -92,6 +89,9 @@ jobs:
       with:
         name: slicer_core-${{ runner.os }}_${{ inputs.python-version }}_${{ runner.arch }}
         path: wheelhouse/slicer_core-*.whl
+
+    - name: Test runtime wheel
+      run: python -m pytest ./Slicer/SlicerCore --local-wheels=./wheelhouse -m runtime --verbose
 
     - name: Build SDK wheel
       run: python -m pip wheel ./Slicer/SlicerCoreSDK --wheel-dir ./wheelhouse --no-build-isolation
