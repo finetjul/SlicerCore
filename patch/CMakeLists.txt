@@ -99,7 +99,11 @@ if(BUILD_SDK)
     USE_SOURCE_PERMISSIONS
   )
 else()
-  vtksdk_generate_package_init(${SKBUILD_PROJECT_NAME} MODULES ${modules})
+  vtksdk_generate_package_init(${SKBUILD_PROJECT_NAME}
+    MODULES ${modules}
+    CONTENT "@PACKAGE_INIT@\nfrom .vtkAddonPython import *\n@PACKAGE_UNINIT@"
+  )
+
   vtksdk_install_runtimes_deps(${SKBUILD_PROJECT_NAME}
     MODULES ${modules}
     PATHS # Add search paths for Windows, the $<CONFIG> versions are there for MSBuild support
@@ -113,6 +117,8 @@ else()
       "${JsonCpp_DIR}/bin"
       "${JsonCpp_DIR}/bin/$<CONFIG>"
   )
+
+  install(DIRECTORY ${vtkAddon_PYTHON_DIR}/ DESTINATION slicer_core)
 
   # These scripts enable users to use slicer in python as-if they were using SlicerPython
   # Example: `import slicer; slicer.vtkMRMLNode()`

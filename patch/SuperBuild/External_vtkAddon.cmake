@@ -32,6 +32,17 @@ if(NOT DEFINED vtkAddon_DIR AND NOT Slicer_USE_SYSTEM_${proj})
   set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
   set(EP_INSTALL_DIR ${EP_DEPENDENCIES_INSTALL_DIR})
 
+  # vtkAddon wraps using a custom wrapping tool that does not know about the VTK SDK.
+  # We have to set the RPATHs to ensure both VTK and vtkAddon native library is found.
+  set(install_rpath)
+  if(APPLE)
+    set(install_rpath "$loader_path/third_party.libs" "@loader_path/../vtkmodules/.dylibs")
+  elseif(NOT WIN32)
+    set(install_rpath "$ORIGIN/third_party.libs" "$ORIGIN/../vtkmodules")
+  endif()
+  # This helps installation to be cross-platform, as we can ignore the actual name of the file.
+  set(python_destination "lib/vtkAddon/pymodules")
+
   ExternalProject_Add(${proj}
     ${${proj}_EP_ARGS}
     GIT_REPOSITORY "${Slicer_${proj}_GIT_REPOSITORY}"
@@ -50,6 +61,8 @@ if(NOT DEFINED vtkAddon_DIR AND NOT Slicer_USE_SYSTEM_${proj})
       -DvtkAddon_USE_UTF8:BOOL=ON
       -DvtkAddon_CMAKE_DIR:PATH=${EP_SOURCE_DIR}/CMake
       -DvtkAddon_LAUNCH_COMMAND:STRING=${Slicer_LAUNCH_COMMAND}
+      "-DvtkAddon_INSTALL_PYTHON_MODULE_LIB_DIR:STRING=${python_destination}"
+      "-DCMAKE_INSTALL_RPATH:STRING=${install_rpath}"
       -DVTK_WRAP_PYTHON_FIND_LIBS:BOOL=OFF
       -DVTK_DIR:PATH=${VTK_DIR}
       ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
@@ -60,6 +73,7 @@ if(NOT DEFINED vtkAddon_DIR AND NOT Slicer_USE_SYSTEM_${proj})
   ExternalProject_GenerateProjectDescription_Step(${proj})
 
   set(vtkAddon_DIR ${EP_INSTALL_DIR}/lib/CMake/vtkAddon)
+  set(vtkAddon_PYTHON_DIR "${EP_INSTALL_DIR}/${python_destination}")
 
   # Add path to SlicerLauncherSettings.ini
   set(${proj}_LIBRARY_PATHS_LAUNCHER_BUILD ${vtkAddon_DIR}/<CMAKE_CFG_INTDIR>)
@@ -100,3 +114,5 @@ mark_as_superbuild(
   VARS vtkAddon_DIR:PATH
   LABELS "FIND_PACKAGE"
 )
+
+mark_as_superbuild(vtkAddon_PYTHON_DIR:PATH)
