@@ -16,17 +16,34 @@ name = "slicer-core-sdk"
 version = "5.11.0.5"
 dependencies = ["vtk==9.6.0"]
 requires-python = ">=3.10"
-description = "3DSlicer Core libraries as a python standalone project"
+readme = "README.md"
+license = { text = "Apache 2.0 License" }
+description = "Slicer Core SDK"
 authors = [
   { name = "Kitware Europe", email = "kitware@kitware.eu" },
   { name = "Alexy Pellegrini", email = "alexy.pellegrini@kitware.com" },
 ]
-license = { text = "Apache 2.0 License" }
-
-[project.optional-dependencies]
-test = [
-    "pytest",
-    "virtualenv"
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Natural Language :: English",
+  "Programming Language :: Python",
+  "Programming Language :: C++",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Healthcare Industry",
+  "Intended Audience :: Science/Research",
+  "Topic :: Multimedia :: Graphics",
+  "Topic :: Multimedia :: Graphics :: 3D Rendering",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Scientific/Engineering :: Medical Science Apps.",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Scientific/Engineering :: Visualization",
+  "Topic :: Software Development :: Libraries",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS"
 ]
 
 [project.entry-points."cmake.prefix"]
